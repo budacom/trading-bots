@@ -1,0 +1,17 @@
+# Your Bot's config values
+
+market: BTCCLP              # Buda.com market where orders will be placed
+reference:
+  name: Bitstamp            # Reference exchange to use for price
+  market: BTCUSD            # Reference market to use for price
+  candle_interval: 5min            # Interval for trades resample to generate candles
+talib:
+  bbands:
+    periods: 14        # Price multiplier for buy order, ie: 1.05 is 5% above reference
+  rsi:
+    periods: 14            # Price multiplier for sell order, ie: 0.95 is 5% under reference
+    overbought: 85          # RSI value to consider the market overbought
+    oversold: 15            # RSI value to consider the market oversold
+amounts:
+ max_base: 1                #  Max amount on sell order, ie: base is BTC on BTCCLP
+ max_quote: 500000          #  Max amount on buy order, ie: quote is CLP on BTCCLP
