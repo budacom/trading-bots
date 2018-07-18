@@ -74,7 +74,7 @@ For more references, go to the [official documentation](https://github.com/budac
 
 ### Setup Config File
 
-Found at `example_bots/simple_limit/configs` folder. Its a yaml file that allows us to easily set parameters.
+Found at `example_bots/technical_analysis/configs` folder. Its a yaml file that allows us to easily set parameters.
 
 **Example:**
 ```yml
