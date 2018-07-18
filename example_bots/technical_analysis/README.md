@@ -102,25 +102,30 @@ amounts:
 ### Setup
 
 ```python
-def _setup(self, config):
-    # Set market
-    self.market = Market(config['market'])
-    # Init variables
-    self.bid_price, self.ask_price = None, None
-    self.base_amount, self.quote_amount = None, None
-    # Set buda trading client
-    self.buda = buda.BudaTrading(
-        self.market, dry_run=self.dry_run, timeout=self.timeout, logger=self.log, store=self.store)
-    # Set converter
-    self.converter = OpenExchangeRates(timeout=self.timeout)
-    # Set reference market client
-    reference_config = config['reference']
-    self.reference = self._get_market_client(reference_config['name'], reference_config['market'])
-    assert self.reference.market.base == self.market.base
+    def _setup(self, config):
+        # Set market
+        self.market = Market(config['market'])
+        # Init variables
+        self.base_amount, self.quote_amount = config['amounts']['max_base'],  config['amounts']['max_quote']
+        self.store_keys = ('trades', self.market.code.lower())
+        self.position = self.store.get('position') or dict(status='closed')
+        # Set talib configs
+        talib_config = config['talib']
+        self.bbands_periods = talib_config['bbands']['periods']
+        self.rsi_periods = talib_config['rsi']['periods']
+        self.rsi_overbought = talib_config['rsi']['overbought']
+        self.rsi_oversold = talib_config['rsi']['oversold']
+        # Set buda trading client
+        self.buda = buda.BudaTrading(
+            self.market, dry_run=self.dry_run, timeout=self.timeout, logger=self.log, store=self.store)
+        # Set reference market client
+        reference_config = config['reference']
+        self.candle_interval = config['reference']['candle_interval']
+        self.reference = self._get_market_client(reference_config['name'], reference_config['market'])
+        assert self.reference.market.base == self.market.base
 ```
 
-- Initializes placeholders for our `prices` and `amounts`.
-- Also setup our clients and variables according to the reference `market` on our configs.
+- Setup our clients and variables according to the reference `market` on our configs.
 
 ### Algorithm
 
