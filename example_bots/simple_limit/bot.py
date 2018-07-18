@@ -4,7 +4,7 @@ from trading_bots.bots import Bot
 from trading_bots.contrib.clients import Market, Side
 from trading_bots.contrib.clients import bitfinex, bitstamp, buda, kraken
 from trading_bots.contrib.converters.open_exchange_rates import OpenExchangeRates
-from trading_bots.utils import truncate_to, validate
+from trading_bots.utils import truncate_to
 
 
 class SimpleLimit(Bot):
