@@ -29,7 +29,7 @@ class BaseStore:
     name = ''
 
     def __init__(self, logger: Logger=None):
-        assert self.name, 'A source name must be defined!'
+        assert self.name, 'A name name must be defined!'
         self.log = logger or get_logger(__name__)
 
     @classmethod
@@ -148,7 +148,7 @@ class JSONStore(Store):
             with open(self.filename) as data_file:
                 return j.load(data_file)
         except FileNotFoundError:
-            self.log.warning(f'File not found! ({self.source})')
+            self.log.warning(f'File not found! ({self.name})')
             return {}
 
     def _write(self, value):
@@ -156,7 +156,7 @@ class JSONStore(Store):
             with open(self.filename, 'w') as outfile:
                 j.dump(value, outfile)
         except Exception:
-            self.log.exception(f'Failed to write to {self.source}!')
+            self.log.exception(f'Failed to write to {self.name}!')
             raise
 
     def _get(self, name: str, **kwargs):
