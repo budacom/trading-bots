@@ -68,7 +68,7 @@ amounts:
 
 ### Setup
 
-```
+```python
 def _setup(self, config):
     # Set market
     self.market = Market(config['market'])
@@ -136,7 +136,7 @@ def _algorithm(self):
 
 As important as our strategy is providing abort instructions which is the piece of code that executes in case anything goes wrong:
 
-```
+```python
 def _abort(self):
     self.log.error('Aborting strategy, cancelling all orders')
     try:

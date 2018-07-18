@@ -65,7 +65,7 @@ to:
 
 ### Setup
 
-```
+```python
 def _setup(self, config):
     # Get configs
     self.from_currency = config['from']['currency']
@@ -124,7 +124,7 @@ def _algorithm(self):
 
 As important as our strategy is providing abort instructions which is the piece of code that executes in case anything goes wrong:
 
-```
+```python
 def _abort(self):
     pass
 ```
