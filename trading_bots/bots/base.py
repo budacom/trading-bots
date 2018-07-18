@@ -17,7 +17,7 @@ class Bot:
     config_file = ''
 
     def __init__(self, config: dict=None, config_name: str=None, logger: Logger=None):
-        assert self.label, 'A Bot object must have a name attribute!'
+        assert self.label, 'A Bot object must have a label attribute!'
         # Set configuration
         self.config = config
         self.config_name = config_name or defaults.BOT_CONFIG
