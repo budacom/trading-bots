@@ -85,9 +85,9 @@ reference:
   candle_interval: 5min     # Interval for trades resample to generate candles
 talib:
   bbands:
-    periods: 14             # Price multiplier for buy order, ie: 1.05 is 5% above reference
+    periods: 14             # Number of periods to calculate Bollinger Bands
   rsi:
-    periods: 14             # Price multiplier for sell order, ie: 0.95 is 5% under reference
+    periods: 14             # Number of periods to calculate Relative Strength Index
     overbought: 85          # RSI value to consider the market overbought
     oversold: 15            # RSI value to consider the market oversold
 amounts:
