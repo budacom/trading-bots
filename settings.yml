@@ -10,6 +10,7 @@ installed_bots:
   - example_bots.any_to_any
   - example_bots.example
   - example_bots.simple_limit
+  - example_bots.relative_orders
 
 logging:
   bots_root: bots
