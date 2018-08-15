@@ -5,5 +5,5 @@ prices:
   buy_multiplier: 0.95      # Price multiplier for buy order, ie: 1.05 is 5% above middle price
   sell_multiplier: 1.05     # Price multiplier for sell order, ie: 0.95 is 5% under middle price
 amounts:
- max_base: 1                #  Max amount on sell order, ie: base is BTC on BTCCLP
- max_quote: 25000000        #  Max amount on buy order, ie: quote is CLP on BTCCLP
+  max_base: 1               #  Max amount on sell order (amount is on BTC for BTCCLP)
+  max_quote: 25000000       #  Max amount on buy order (amount is on CLP for BTCCLP)

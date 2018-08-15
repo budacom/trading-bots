@@ -10,23 +10,26 @@ This strategy places a buy order below the center price and a sell order above t
 
 Currently this example allows only `Dynamic Center Price`, `Fixed Spread` and `Fixed Order Size`.
 
-
 ## Installation
 
 Clone or download this repository to your working environment
+
 ```bash
-$ git clone https://github.com/budacom/buda-bots.git
+git clone https://github.com/budacom/buda-bots.git
 ```
 
 Install dependencies using pipenv (or pip, of course)
+
 ```bash
-$ pipenv install
+pipenv install
 ```
 
-Then, activate the virtual enviroment:
+Then, activate the virtual environment:
+
 ```bash
-$ pipenv shell
+pipenv shell
 ```
+
 We are ready!
 
 ## Authentication
@@ -45,23 +48,25 @@ For more references, go to the [official documentation](https://github.com/budac
 
 ### Setup Config File
 
-Found at `example_bots/relative_orders/configs` folder. Its a yaml file that allows us to easily set parameters.
+Found at `example_bots/relative_orders/configs` folder. Its a `.yaml` file that allows us to easily set parameters.
 
 **Example:**
-```yml
-market: BTCCLP              # Buda.com market where orders will be placed
-prices:
-  buy_multiplier: 0.95      # Price multiplier for buy order, ie: 1.05 is 5% above middle price
-  sell_multiplier: 1.05     # Price multiplier for sell order, ie: 0.95 is 5% under middle price
-amounts:
- max_base: 1                #  Max amount on sell order, ie: base is BTC on BTCCLP
- max_quote: 25000000        #  Max amount on buy order, ie: quote is CLP on BTCCLP
 
+```yml
+market: BTCCLP
+prices:
+  buy_multiplier: 0.95
+  sell_multiplier: 1.05
+amounts:
+  max_base: 1
+  max_quote: 25000000
 ```
 
+- market: Buda.com market where orders will be placed.
+- prices: Price multipliers for buy and sell orders, ie: 1.05 is 5% above middle price.
+- amounts: Max amounts on buy and sell orders.
+
 ## Bot Strategy
-
-
 
 ### Setup
 
@@ -69,59 +74,70 @@ amounts:
 def _setup(self, config):
     # Set market
     self.market = Market(config['market'])
-    # Init variables
-    self.bid_price, self.ask_price = None, None
-    self.base_amount, self.quote_amount = None, None
     # Set buda trading client
-    self.buda = buda.BudaTrading(
-        self.market, dry_run=self.dry_run, timeout=self.timeout, logger=self.log, store=self.store)
+    self.buda = buda.BudaTrading(self.market, self.dry_run, self.timeout, self.log, self.store)
 ```
 
-- Initializes placeholders for our `prices` and `amounts`.
-- Also setup our buda client and variables according to the `market` on our configs.
+- Sets market according to the `market` on our config.
+- Setup our Buda.com client for the market.
 
 ### Algorithm
 
 We describe our instructions following our desired automation logic:
 
 ```python
-def _algorithm(self):
-    # Setup
-    self.log.info(f'Preparing prices using for {self.market.code}')
-    self.prepare_prices()
-    # Cancel open orders
-    self.log.info('Closing open orders')
-    self.cancel_orders()
-    # Get available balances
-    self.prepare_amounts()
-    # Start strategy
-    self.log.info('Starting order deployment')
-    # Deploy orders
-    deploy_list = self.get_deploy_list()
-    self.deploy_orders(deploy_list)
+    def _algorithm(self):
+        # PREPARE ORDER PRICES
+        # Get middle price
+        max_bid, min_ask = self.buda.get_spread_details()
+        middle_price = (max_bid + min_ask) / 2
+        self.log.info(f'Ticker prices   | Bid: {max_bid} | Ask: {min_ask} | Middle: {middle_price}')
+        # Offset prices from middle using configured price multipliers
+        prices_config = self.config['prices']
+        price_buy = truncate_to(middle_price * prices_config['buy_multiplier'], currency=self.market.quote)
+        price_sell = truncate_to(middle_price * prices_config['sell_multiplier'], currency=self.market.quote)
+        self.log.info(f'Relative prices | Buy: {price_buy} | Sell: {price_sell}')
+
+        # PREPARE ORDER AMOUNTS
+        # Cancel open orders to get correct available amounts
+        self.log.info('Closing open orders')
+        self.buda.cancel_orders()
+        # Fetch available amounts
+        available_base = self.buda.wallets.base.get_available()
+        available_quote = self.buda.wallets.quote.get_available()
+        # Adjust amounts to max in config
+        amounts_config = self.config['amounts']
+        amount_base = min(amounts_config['max_base'], available_base)
+        amount_quote = min(amounts_config['max_quote'], available_quote)
+        # Get order buy and sell amounts
+        # *quote amount must be converted to base
+        amount_buy = truncate_to(amount_quote / price_buy, currency=self.market.base)
+        amount_sell = truncate_to(amount_base, currency=self.market.base)
+        self.log.info(f'Amounts | Buy {amount_buy} {self.market.quote} | Sell {amount_sell} {self.market.base}')
+
+        # PLACE ORDERS
+        self.log.info('Starting order deployment')
+        self.buda.place_limit_order(side=Side.BUY, amount=amount_buy, price=price_buy)
+        self.buda.place_limit_order(side=Side.SELL, amount=amount_sell, price=price_sell)
 ```
 
+**Prepare order prices:**
 
-**Prepare prices**
-
-- First, we get our `market` ticker from buda.com.
+- First, we get the `market spread` from Buda.com's API.
 - Calculate middle price from `max_bid` and `min_ask` given on our ticker.
 - We offset our middle price using our `multipliers` from configs and save them as `bid_price` and `ask_price`.
 
-**Cancel orders**
+**Prepare order amounts:**
 
 - Cancel all pending orders at the selected market on Buda.com. This frees balance to use on our orders.
-
-**Prepare Amounts**
 - Get amounts from configs to dictate maximum allowed to spend on each order.
 - Validates against available balance.
 - Sets the amount to be used on orders as quote_amount and base_amount.
 
-**Get Deploy List**
-- Builds a list of orders to be deployed.
+**Place orders:**
 
-**Deploy Orders**
-- Places our orders at the exchange (You can test with `dry_run=True` flag on global settings to be sure).
+- Builds a list of orders to be deployed.
+- Places our orders at the exchange (You can test with `dry_run: True` flag on global settings to be sure).
 
 ### Abort
 
@@ -133,41 +149,47 @@ def _abort(self):
     try:
         self.cancel_orders()
     except Exception:
-        self.log.exception(f'Failed!, some orders might not be cancelled')
+        self.log.critical(f'Failed!, some orders might not be cancelled')
         raise
     else:
         self.log.info(f'All open orders were cancelled')
 ```
+
 - Basic abort function, we want to cancel all pending orders and exit.
 
 ## Running bots
 
 Test by running the desired bot once from console:
+
 ```bash
-$ python bots.py run RelativeOrders
+python bots.py run RelativeOrders
 ```
 
 Flag `--config` can be specified to change the default config file:
+
 ```bash
-$ python bots.py run RelativeOrders --config /path/to/relative-orders_other.yml
+python bots.py run RelativeOrders --config /path/to/your/config.yml
 ```
 
 Now, we need this to run on a loop, we should use `loop` option indicating `--interval` as seconds:
+
 ```bash
-$ python bots.py loop RelativeOrders --interval 300
+python bots.py loop RelativeOrders --interval 300
 ```
 
 Running multiple bots for different markets is possible using multiple shells and config files:
 
 Shell 1:
+
 ```bash
-$ python bots.py loop RelativeOrders --interval 300 --config relative-orders_btcclp.yml
-```
-Shell 2:
-```bash
-$ python bots.py loop RelativeOrders --interval 300 --config relative-orders_ethclp.yml
+python bots.py loop RelativeOrders --interval 300 --config btcclp.yml
 ```
 
+Shell 2:
+
+```bash
+python bots.py loop RelativeOrders --interval 300 --config ethclp.yml
+```
 
 ## Contributing
 
