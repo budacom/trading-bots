@@ -143,7 +143,7 @@ from trading_bots.conf import settings
 from trading_api_wrappers import Buda
 
 
-class Mybot(Bot):
+class MyBot(Bot):
     # The label is a unique identifier you assign to your bot on Trading-Bots
     label = 'MyBot'
 
@@ -191,7 +191,7 @@ Run the bot!
 
 Or put it to work in a loop!
 
-    $ bots loop MyBot --interval 5
+    $ python bots.py loop MyBot --interval 5
 
     TRADING BOTS 🤖
     ===============
@@ -233,7 +233,7 @@ from trading_bots.conf import settings
 from trading_api_wrappers import Buda
 
 
-class Mybot(Bot):
+class MyBot(Bot):
     label = 'MyBot'
 
     def _setup(self, config):
@@ -281,7 +281,7 @@ Run the bot!
 
 Or put it to work in a loop!
 
-    $ bots loop MyBot --interval 10
+    $ python bots.py loop MyBot --interval 10
 
     TRADING BOTS 🤖
     ===============
@@ -313,7 +313,7 @@ Trading-Bots comes with a handy `CLI` named... `bots-admin`!
 
 #### Start a project
 
-    $ bots startproject
+    $ python bots.py startproject
 
 ```bash
 TRADING BOTS 🤖
@@ -336,7 +336,7 @@ Success: 'MyProject' project was successfully created on '.'
 
 #### Create a bot
 
-    $ bots createbot
+    $ python bots.py createbot
 
 ```bash
 TRADING BOTS 🤖
@@ -369,7 +369,7 @@ installed_bots:
 
 #### Run bot once
 
-    $ bots run BOT [OPTIONS]
+    $ python bots.py run BOT [OPTIONS]
 
 Run a specified `BOT` by label. Options:
 
@@ -381,7 +381,7 @@ Run a specified `BOT` by label. Options:
 
 
 ```bash
-$ bots run Example
+$ python bots.py run Example
 
 TRADING BOTS 🤖
 ===============
@@ -403,7 +403,7 @@ Ending Example 1530691595: 2018-07-04 08:06:40
 
 #### Run bot in a loop
 
-    $ bots loop BOT [OPTIONS]
+    $ python bots.py loop BOT [OPTIONS]
 
 Schedule a `BOT` (by label) to run on an interval. Options:
 
@@ -415,7 +415,7 @@ Schedule a `BOT` (by label) to run on an interval. Options:
 | `--settings`     | Global settings files (YAML format) |
 
 ```bash
-$ bots loop Example -i 5
+$ python bots.py loop Example -i 5
 
 TRADING BOTS 🤖
 ===============
